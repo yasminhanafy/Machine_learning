@@ -1,0 +1,165 @@
+clc 
+clear 
+close all
+[Data] = xlsread('E:\Yasmin\heart_DD.csv');
+X=[(ones(length(Data),1)),Data(:,1:13)];
+y=Data(:,14);
+[m,f]=size(X);
+alpha=0.03;
+theta=zeros(f,1);
+m_theta=zeros(f,15000);
+h=zeros(m,15000);
+cost=zeros(m,1);
+cost_total=zeros(1,15000);
+g=zeros(m,1);
+z=X*theta;
+%hypothesis 2 
+X2=X(:,2:14).^2;
+X_sq=[X X2];
+[m2,f2]=size(X_sq);
+theta2=zeros(f2,1);
+m_theta2=zeros(f2,15000);
+%h2=zeros(m2,15000);
+%g2=zeros(m2,1);
+z2=X_sq*theta2;
+% hypothesis 3 
+X3=X(:,2:14).^3;
+X_qub=[X X2 X3];
+[m3,f3]=size(X_qub);
+theta3=zeros(f3,1);
+m_theta3=zeros(f3,15000);
+h3=zeros(m3,15000);
+g3=zeros(m3,1);
+z3=X_qub*theta3;
+%hypothesis 4 
+X4=X(:,2:14).^4;
+X_4=[X X2 X3 X4];
+[m4,f4]=size(X_4);
+theta4=zeros(f4,1);
+m_theta4=zeros(f4,15000);
+h4=zeros(m4,15000);
+g4=zeros(m3,1);
+z4=X_4*theta4;
+
+% scaling X for hypothesis one 
+n=length(X(1,:));
+for w=2:n
+    if max(abs(X(:,w)))~=0
+    X(:,w)=(X(:,w)-mean((X(:,w))))./std(X(:,w));
+    end
+end
+% scaling X for hypothesis 2 
+n2=length(X_sq(1,:));
+for w=2:n2
+    if max(abs(X_sq(:,w)))~=0
+    X_sq(:,w)=(X_sq(:,w)-mean((X_sq(:,w))))./std(X_sq(:,w));
+    end
+end
+
+% scaling X for hypothesis 3 
+n3=length(X_qub(1,:));
+for w=2:n3
+    if max(abs(X_qub(:,w)))~=0
+    X_qub(:,w)=(X_qub(:,w)-mean((X_qub(:,w))))./std(X_qub(:,w));
+    end
+end
+
+% scaling X for hypothesis 4 
+n4=length(X_4(1,:));
+for w=2:n4
+    if max(abs(X_4(:,w)))~=0
+    X_4(:,w)=(X_4(:,w)-mean((X_4(:,w))))./std(X_4(:,w));
+    end
+end
+
+% Gradient descent for hypothesis 1
+for j=1:15000
+    
+z=X*theta;
+for i=1:m
+g(i,1)=1/(1+exp(-z(i,1)));
+h(i,j)=g(i,1);
+end 
+  j_v(1,j)=1/m*(-transpose(y)*log10(h(:,j))-(transpose(1-y)*log10(1-h(:,j))));   
+theta_new=theta-(alpha/m)*transpose(X)*((g)-y);
+m_theta(:,j)=theta_new;
+theta=theta_new;
+end 
+
+ %Gradient Descent for hypothesis 2 
+ 
+for j=1:15000
+
+
+z2=X_sq*theta2;
+for i=1:m2
+g2(i,1)=1/(1+exp(-z2(i,1)));
+h2(i,j)=g2(i,1);
+end
+
+j_v2(1,j)=1/m2*(-transpose(y)*log10(h2(:,j))-(transpose(1-y)*log10(1-h2(:,j))));
+
+theta_new2=theta2-(alpha/m2)*transpose(X_sq)*((g2)-y);
+m_theta2(:,j)=theta_new2;
+theta2=theta_new2;
+
+end
+
+
+
+
+%Gradient Descent for hypothesis 3  
+for j=1:15000
+z3=X_qub*theta3;
+for i=1:m3
+g3(i,1)=1/(1+exp(-z3(i,1)));
+h3(i,j)=g3(i,1);
+end 
+j_v3(1,j)=1/m3*(-transpose(y)*log10(h3(:,j))-(transpose(1-y)*log10(1-h3(:,j))));   
+theta_new3=theta3-(alpha/m3)*transpose(X_qub)*((g3)-y);
+m_theta3(:,j)=theta_new3;
+theta3=theta_new3;
+end 
+
+%Gradient Descent for hypothesis 4 
+for j=1:15000
+z4=X_4*theta4;
+for i=1:m4
+g4(i,1)=1/(1+exp(-z4(i,1)));
+h4(i,j)=g4(i,1);
+end
+
+
+j_v4(1,j)=1/m4*(-transpose(y)*log10(h4(:,j))-(transpose(1-y)*log10(1-h4(:,j))));
+
+theta_new4=theta4-(alpha/m4)*transpose(X_4)*((g4)-y);
+m_theta4(:,j)=theta_new4;
+theta4=theta_new4;
+
+
+
+end 
+
+ [M I]=min(j_v)
+ theta_best1=m_theta(:,I);
+ [M2 I2]=min(j_v2)
+  theta_best2=m_theta2(:,I2);
+ [M3 I3]=min(j_v3)
+  theta_best3=m_theta3(:,I3);
+ [M4 I4]=min(j_v4)
+  theta_best4=m_theta4(:,I4);
+ %hypothesis 1 
+  it=[1:15000]
+ figure(1)
+ plot(it,j_v)
+ %hypothesis 2 
+ figure()
+ plot(it,j_v2)
+ %hypothesis 3 
+ figure()
+ plot(it,j_v3)
+ %hypothesis 4 
+ figure()
+ plot(it,j_v4)
+ 
+ 
